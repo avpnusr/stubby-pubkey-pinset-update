@@ -12,6 +12,12 @@ echo -e "${RED}Sorry, your stubby-config could not be found, please check!${NC}"
 exit 0
 fi
 
+if [ ! -w ${STUBBYCFG} ]; then
+echo -e "${RED}Sorry, your stubby-config is not writeable, please check!${NC}"
+exit 0
+fi
+
+
 DNSSRV=$(cat ${STUBBYCFG} | grep -v "#" | grep address | awk '{print $3}' | grep -v ^$)
 
 for IP in ${DNSSRV}; do
