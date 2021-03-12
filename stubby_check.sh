@@ -7,16 +7,20 @@ STUBBYCFG="/etc/stubby/stubby.yml"
 STUBBYPID=$(pgrep stubby)
 PINCHG="0"
 
-if [ ! -f ${STUBBYCFG} ]; then
-echo -e "${RED}Sorry, your stubby-config could not be found, please check!${NC}"
+if  ! command -v dig &> /dev/null || ! command -v openssl &> /dev/null; then
+echo -e "${RED}Sorry, either dig or openssl is missing - please install it first!${NC}"
 exit 0
 fi
 
-if [ ! -w ${STUBBYCFG} ]; then
-echo -e "${RED}Sorry, your stubby-config is not writeable, please check!${NC}"
+if [ ! -f ${STUBBYCFG} ] || [ ! -w ${STUBBYCFG} ]; then
+echo -e "${RED}Sorry, your stubby-config could not be found or is not writeable, please check!${NC}"
 exit 0
 fi
 
+if [ "$(dig @8.8.8.8 +short +time=5 +tries=2 google.com. | grep -v [0-9.])" ]; then
+echo -e "${RED}ERROR - exiting due to DNS-resolving problem!${NC}"
+exit 0
+fi
 
 DNSSRV=$(cat ${STUBBYCFG} | grep -v "#" | grep address | awk '{print $3}' | grep -v ^$)
 
